@@ -89,7 +89,7 @@ func genResponsePayload(operationID string) string {
 	var buffer = bytes.NewBufferString("")
 
 	// Here is where we build up a response:
-	fmt.Fprintf(buffer, "&%s{\n", genResponseTypeName(operationID))
+	fmt.Fprintf(buffer, "&%s{\n", UppercaseFirstCharacter(genResponseTypeName(operationID)))
 	fmt.Fprintf(buffer, "Body: bodyBytes,\n")
 	fmt.Fprintf(buffer, "HTTPResponse: rsp,\n")
 	fmt.Fprintf(buffer, "}")
