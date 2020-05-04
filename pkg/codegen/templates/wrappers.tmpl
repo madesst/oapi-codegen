@@ -1,5 +1,5 @@
 {{- define "pass-body-to-call" -}}
-{{- if eq (len .Bodies) 1 }}, {{ lcFirst (first .Bodies).Schema.RefType }}{{- end -}}
+{{- if eq (len .Bodies) 1 }}, {{ lcFirst (first .Bodies).Schema.GoType }}{{- end -}}
 {{- end }}
 
 
@@ -131,8 +131,8 @@ func (w *ServerInterfaceWrapper) {{.OperationId}} (ctx echo.Context) error {
 {{- end }}
 {{- if eq (len .Bodies) 1 }}
 {{- $body := first .Bodies }}
-    var {{ lcFirst $body.Schema.RefType }} {{ $body.Schema.RefType }}
-    if err = ctx.Bind({{ lcFirst $body.Schema.RefType }}); err != nil {
+    var {{ lcFirst $body.Schema.GoType }} {{ $body.Schema.GoType }}
+    if err = ctx.Bind(&{{ lcFirst $body.Schema.GoType }}); err != nil {
         return err
     }
 {{- end }}

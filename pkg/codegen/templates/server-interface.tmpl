@@ -5,7 +5,7 @@
 {{- if eq (len .Bodies) 1 }}
 {{- $body := first .Bodies }}
 {{- $opid := .OperationId -}}
-, body {{ if not $body.Required }}*{{ end }}{{ $body.Schema.RefType }}
+, body {{ if not $body.Required }}*{{ end }}{{ $body.Schema.GoType }}
 {{- end }}
 {{- end }}
 
