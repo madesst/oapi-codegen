@@ -138,7 +138,17 @@ func (w *ServerInterfaceWrapper) {{.OperationId}} (ctx echo.Context) error {
 {{- end }}
 
     // Invoke the callback with all the unmarshalled arguments
+    {{- $responses := getResponseTypeDefinitions . }}
+    {{- if eq (len $responses) 1 }}
+    var resp {{ (first $responses).Schema.TypeDecl }}
+    resp, err = w.Handler.{{.OperationId}}(ctx{{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}}{{- template "pass-body-to-call" . }})
+    if err != nil {
+        return err
+    }
+    return ctx.JSON(http.StatusOK, resp)
+    {{- else }}
     err = w.Handler.{{.OperationId}}(ctx{{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}}{{- template "pass-body-to-call" . }})
     return err
+    {{- end }}
 }
 {{end}}

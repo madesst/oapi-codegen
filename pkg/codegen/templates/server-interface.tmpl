@@ -3,17 +3,28 @@
 {{- fail "too many request bodies"}}
 {{- end }}
 {{- if eq (len .Bodies) 1 }}
-{{- $body := first .Bodies }}
-{{- $opid := .OperationId -}}
+{{- $body := first .Bodies -}}
 , body {{ if not $body.Required }}*{{ end }}{{ $body.Schema.GoType }}
+{{- end }}
+{{- end }}
+
+{{- define "add-response-body-to-method-def" -}}
+{{- $responses := getResponseTypeDefinitions . }}
+{{- if gt (len $responses) 1 }}
+{{- fail (cat "more then one type of response in api definition is not supported in this codegen:" "path=" .Path "len(responses)=" (len $responses)) }}
+{{- end }}
+{{- if eq (len $responses) 1 }}
+{{- $response := first $responses -}}
+(resp {{$response.Schema.TypeDecl}}, err error)
+{{- else -}}
+error
 {{- end }}
 {{- end }}
 
 // ServerInterface represents all server handlers.
 type ServerInterface interface {
 {{range .}}{{.SummaryAsComment }}
-// ({{.Method}} {{.Path}})
 
-{{.OperationId}}(ctx echo.Context{{genParamArgs .PathParams}}{{if .RequiresParamObject}}, params {{.OperationId}}Params{{end}}{{ template "add-request-body-to-method-args" . }}) error //({{- range getResponseTypeDefinitions .}}{{.TypeName}} *{{.Schema.TypeDecl}}, {{- end}}err error)
+{{.OperationId}}(ctx echo.Context{{genParamArgs .PathParams}}{{if .RequiresParamObject}}, params {{.OperationId}}Params{{end}}{{ template "add-request-body-to-method-args" . }}) {{ template "add-response-body-to-method-def" . }}
 {{end}}
 }
