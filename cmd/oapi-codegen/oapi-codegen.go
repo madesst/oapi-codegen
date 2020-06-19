@@ -33,12 +33,13 @@ func errExit(format string, args ...interface{}) {
 
 func main() {
 	var (
-		packageName  string
-		generate     string
-		outputFile   string
-		includeTags  string
-		excludeTags  string
-		templatesDir string
+		packageName    string
+		generate       string
+		outputFile     string
+		includeTags    string
+		excludeTags    string
+		templatesDir   string
+		importMappings string
 	)
 	flag.StringVar(&packageName, "package", "", "The package name for generated code")
 	flag.StringVar(&generate, "generate", "types,client,server,spec",
@@ -47,6 +48,7 @@ func main() {
 	flag.StringVar(&includeTags, "include-tags", "", "Only include operations with the given tags. Comma-separated list of tags.")
 	flag.StringVar(&excludeTags, "exclude-tags", "", "Exclude operations that are tagged with the given tags. Comma-separated list of tags.")
 	flag.StringVar(&templatesDir, "templates", "", "Path to directory containing user templates")
+	flag.StringVar(&importMappings, "import-mappings", "", "Comma separated list of pre-existing types that should be imported")
 	flag.Parse()
 
 	if flag.NArg() < 1 {

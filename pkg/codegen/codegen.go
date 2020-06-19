@@ -41,6 +41,7 @@ type Options struct {
 	SkipPrune          bool              // Whether to skip pruning unused components on the generated code
 	IncludeTags        []string          // Only include operations that have one of these tags. Ignored when empty.
 	ExcludeTags        []string          // Exclude operations that have one of these tags. Ignored when empty.
+	ImportMappings     map[string]string // Tells in which package the existing struct is defined
 	UserTemplates      map[string]string // Override built-in templates from user-provided files
 }
 

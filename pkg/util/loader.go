@@ -21,7 +21,9 @@ func LoadSwagger(filePath string) (*openapi3.Swagger, error) {
 	switch ext {
 	// The YAML handler can parse both YAML and JSON
 	case ".yaml", ".yml", ".json":
-		swagger, err = openapi3.NewSwaggerLoader().LoadSwaggerFromData(data)
+		loader := openapi3.NewSwaggerLoader()
+		loader.IsExternalRefsAllowed = true
+		swagger, err = loader.LoadSwaggerFromData(data)
 	default:
 		return nil, fmt.Errorf("%s is not a supported extension, use .yaml, .yml or .json", ext)
 	}
