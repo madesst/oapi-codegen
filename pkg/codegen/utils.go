@@ -205,7 +205,8 @@ func StringInArray(str string, array []string) bool {
 func RefPathToGoType(refPath string) (string, error) {
 	pathParts := strings.Split(refPath, "/")
 	if pathParts[0] != "#" {
-		return "", errors.New("Only local document components are supported")
+		refParts := strings.Split(refPath, "#")
+		return RefPathToGoType("#" + refParts[1])
 	}
 	if len(pathParts) != 4 {
 		return "", errors.New("Parameter nesting is deeper than supported")
