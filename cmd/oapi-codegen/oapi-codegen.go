@@ -93,6 +93,15 @@ func main() {
 	opts.IncludeTags = splitCSVArg(includeTags)
 	opts.ExcludeTags = splitCSVArg(excludeTags)
 
+	{
+		importMappingsList := splitCSVArg(importMappings)
+		opts.ImportMappings = map[string]string{}
+		for _, singleImportMapping := range importMappingsList {
+			keyValue := strings.Split(singleImportMapping, "=")
+			opts.ImportMappings[keyValue[0]] = keyValue[1]
+		}
+	}
+
 	if opts.GenerateEchoServer && opts.GenerateChiServer {
 		errExit("can not specify both server and chi-server targets simultaneously")
 	}

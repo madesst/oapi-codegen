@@ -205,8 +205,7 @@ func StringInArray(str string, array []string) bool {
 func RefPathToGoType(refPath string) (string, error) {
 	pathParts := strings.Split(refPath, "/")
 	if pathParts[0] != "#" {
-		refParts := strings.Split(refPath, "#")
-		return RefPathToGoType("#" + refParts[1])
+		return refPath, nil
 	}
 	if len(pathParts) != 4 {
 		return "", errors.New("Parameter nesting is deeper than supported")

@@ -187,6 +187,16 @@ func Generate(swagger *openapi3.Swagger, packageName string, opts Options) (stri
 		}
 	}
 
+	var knownImports = map[string]string{}
+	for specPath, importPackage := range knownImports {
+		var alias string
+		im := goImport{
+			alias: alias,
+			packageName: importPackage,
+		}
+		imports = append(imports, im.String())
+	}
+
 	importsOut, err := GenerateImports(t, imports, packageName)
 	if err != nil {
 		return "", errors.Wrap(err, "error generating imports")
