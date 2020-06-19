@@ -95,10 +95,15 @@ func main() {
 
 	{
 		importMappingsList := splitCSVArg(importMappings)
-		opts.ImportMappings = map[string]string{}
+		opts.ImportMappings = map[string]codegen.GoImport{}
 		for _, singleImportMapping := range importMappingsList {
 			keyValue := strings.Split(singleImportMapping, "=")
-			opts.ImportMappings[keyValue[0]] = keyValue[1]
+
+			packageAndAlias := strings.Split(keyValue[1], "|")
+			opts.ImportMappings[keyValue[0]] = codegen.GoImport{
+				PackageName: packageAndAlias[0],
+				Alias:       packageAndAlias[1],
+			}
 		}
 	}
 

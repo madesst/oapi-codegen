@@ -32,17 +32,29 @@ import (
 
 // Options defines the optional code to generate.
 type Options struct {
-	GenerateChiServer  bool              // GenerateChiServer specifies whether to generate chi server boilerplate
-	GenerateEchoServer bool              // GenerateEchoServer specifies whether to generate echo server boilerplate
-	GenerateClient     bool              // GenerateClient specifies whether to generate client boilerplate
-	GenerateTypes      bool              // GenerateTypes specifies whether to generate type definitions
-	EmbedSpec          bool              // Whether to embed the swagger spec in the generated code
-	SkipFmt            bool              // Whether to skip go fmt on the generated code
-	SkipPrune          bool              // Whether to skip pruning unused components on the generated code
-	IncludeTags        []string          // Only include operations that have one of these tags. Ignored when empty.
-	ExcludeTags        []string          // Exclude operations that have one of these tags. Ignored when empty.
-	ImportMappings     map[string]string // Tells in which package the existing struct is defined
-	UserTemplates      map[string]string // Override built-in templates from user-provided files
+	GenerateChiServer  bool                // GenerateChiServer specifies whether to generate chi server boilerplate
+	GenerateEchoServer bool                // GenerateEchoServer specifies whether to generate echo server boilerplate
+	GenerateClient     bool                // GenerateClient specifies whether to generate client boilerplate
+	GenerateTypes      bool                // GenerateTypes specifies whether to generate type definitions
+	EmbedSpec          bool                // Whether to embed the swagger spec in the generated code
+	SkipFmt            bool                // Whether to skip go fmt on the generated code
+	SkipPrune          bool                // Whether to skip pruning unused components on the generated code
+	IncludeTags        []string            // Only include operations that have one of these tags. Ignored when empty.
+	ExcludeTags        []string            // Exclude operations that have one of these tags. Ignored when empty.
+	ImportMappings     map[string]GoImport // Tells in which package the existing struct is defined
+	UserTemplates      map[string]string   // Override built-in templates from user-provided files
+}
+
+type GoImport struct {
+	Alias       string
+	PackageName string
+}
+
+func (g GoImport) String() string {
+	return goImport{
+		alias:       g.Alias,
+		packageName: g.PackageName,
+	}.String()
 }
 
 type goImport struct {
@@ -187,17 +199,11 @@ func Generate(swagger *openapi3.Swagger, packageName string, opts Options) (stri
 		}
 	}
 
-	var knownImports = map[string]string{}
-	for specPath, importPackage := range knownImports {
+	for specPath, goImport := range opts.ImportMappings {
 		_ = specPath
-		var alias string
-		im := goImport{
-			alias: alias,
-			packageName: importPackage,
-		}
-		imports = append(imports, im.String())
+		imports = append(imports, goImport.String())
 
-		typeDefinitions = strings.Replace(typeDefinitions, specPath + "#", alias + ".", -1)
+		typeDefinitions = strings.Replace(typeDefinitions, specPath+"#", goImport.Alias+".", -1)
 	}
 
 	importsOut, err := GenerateImports(t, imports, packageName)
