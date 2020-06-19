@@ -65,7 +65,7 @@ func ToCamelCase(str string) string {
 		if unicode.IsUpper(v) {
 			n += string(v)
 		}
-			if unicode.IsDigit(v) {
+		if unicode.IsDigit(v) {
 			n += string(v)
 		}
 		if unicode.IsLower(v) {
@@ -76,7 +76,7 @@ func ToCamelCase(str string) string {
 			}
 		}
 
-		 if strings.ContainsRune(separators, v) {
+		if strings.ContainsRune(separators, v) {
 			capNext = true
 		} else {
 			capNext = false
@@ -205,7 +205,12 @@ func StringInArray(str string, array []string) bool {
 func RefPathToGoType(refPath string) (string, error) {
 	pathParts := strings.Split(refPath, "/")
 	if pathParts[0] != "#" {
-		return refPath, nil
+		refPathParts := strings.Split(refPath, "#")
+		onlyType, err := RefPathToGoType("#" + refPathParts[1])
+		if err != nil {
+			return "", err
+		}
+		return refPathParts[0] + "#" + onlyType, nil
 	}
 	if len(pathParts) != 4 {
 		return "", errors.New("Parameter nesting is deeper than supported")

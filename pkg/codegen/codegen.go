@@ -196,6 +196,8 @@ func Generate(swagger *openapi3.Swagger, packageName string, opts Options) (stri
 			packageName: importPackage,
 		}
 		imports = append(imports, im.String())
+
+		typeDefinitions = strings.Replace(typeDefinitions, specPath + "#", alias + ".", -1)
 	}
 
 	importsOut, err := GenerateImports(t, imports, packageName)
