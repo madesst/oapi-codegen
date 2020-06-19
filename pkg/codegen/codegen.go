@@ -189,6 +189,7 @@ func Generate(swagger *openapi3.Swagger, packageName string, opts Options) (stri
 
 	var knownImports = map[string]string{}
 	for specPath, importPackage := range knownImports {
+		_ = specPath
 		var alias string
 		im := goImport{
 			alias: alias,
