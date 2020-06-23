@@ -202,6 +202,7 @@ func Generate(swagger *openapi3.Swagger, packageName string, opts Options) (stri
 	for specPath, goImport := range opts.ImportMappings {
 		_ = specPath
 		imports = append(imports, goImport.String())
+		fmt.Println("specPath", specPath, goImport.Alias)
 
 		typeDefinitions = strings.Replace(typeDefinitions, specPath+"#", goImport.Alias+".", -1)
 	}

@@ -92,7 +92,7 @@ func main() {
 
 	opts.IncludeTags = splitCSVArg(includeTags)
 	opts.ExcludeTags = splitCSVArg(excludeTags)
-
+	fmt.Fprintln(os.Stderr, "import mappings", importMappings)
 	{
 		importMappingsList := splitCSVArg(importMappings)
 		opts.ImportMappings = map[string]codegen.GoImport{}
