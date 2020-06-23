@@ -204,18 +204,16 @@ func StringInArray(str string, array []string) bool {
 // components.
 func RefPathToGoType(refPath string) (string, error) {
 	pathParts := strings.Split(refPath, "/")
-	if pathParts[0] != "#" {
-		refPathParts := strings.Split(refPath, "#")
-		onlyType, err := RefPathToGoType("#" + refPathParts[1])
-		if err != nil {
-			return "", err
+	if pathParts[0] == "#" {
+		if len(pathParts) != 4 {
+			return "", errors.New("Parameter nesting is deeper than supported")
 		}
-		return refPathParts[0] + "#" + onlyType, nil
+		return SchemaNameToTypeName(pathParts[3]), nil
+	} else if strings.Contains(refPath, "#") {
+		return "", errors.New("Only single external references are supported (without specifying path inside a file)")
+	} else {
+		return refPath, nil
 	}
-	if len(pathParts) != 4 {
-		return "", errors.New("Parameter nesting is deeper than supported")
-	}
-	return SchemaNameToTypeName(pathParts[3]), nil
 }
 
 // This function converts a swagger style path URI with parameters to a
