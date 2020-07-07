@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 )
 
@@ -284,7 +285,8 @@ func NewPostBothRequest(server string, body PostBothJSONRequestBody) (*http.Requ
 func NewPostBothRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -299,7 +301,8 @@ func NewPostBothRequestWithBody(server string, contentType string, body io.Reade
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	var req *http.Request
+	req, err = http.NewRequest("POST", queryUrl.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -312,7 +315,8 @@ func NewPostBothRequestWithBody(server string, contentType string, body io.Reade
 func NewGetBothRequest(server string) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +331,8 @@ func NewGetBothRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -350,7 +355,8 @@ func NewPostJsonRequest(server string, body PostJsonJSONRequestBody) (*http.Requ
 func NewPostJsonRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -365,7 +371,8 @@ func NewPostJsonRequestWithBody(server string, contentType string, body io.Reade
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	var req *http.Request
+	req, err = http.NewRequest("POST", queryUrl.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -378,7 +385,8 @@ func NewPostJsonRequestWithBody(server string, contentType string, body io.Reade
 func NewGetJsonRequest(server string) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +401,8 @@ func NewGetJsonRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -405,7 +414,8 @@ func NewGetJsonRequest(server string) (*http.Request, error) {
 func NewPostOtherRequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -420,7 +430,8 @@ func NewPostOtherRequestWithBody(server string, contentType string, body io.Read
 		return nil, err
 	}
 
-	req, err := http.NewRequest("POST", queryUrl.String(), body)
+	var req *http.Request
+	req, err = http.NewRequest("POST", queryUrl.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -433,7 +444,8 @@ func NewPostOtherRequestWithBody(server string, contentType string, body io.Read
 func NewGetOtherRequest(server string) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -448,7 +460,8 @@ func NewGetOtherRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -460,7 +473,8 @@ func NewGetOtherRequest(server string) (*http.Request, error) {
 func NewGetJsonWithTrailingSlashRequest(server string) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -475,7 +489,8 @@ func NewGetJsonWithTrailingSlashRequest(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -1010,19 +1025,19 @@ type EchoRouter interface {
 }
 
 // RegisterHandlers adds each server route to the EchoRouter.
-func RegisterHandlers(router EchoRouter, si ServerInterface) {
+func RegisterHandlers(router EchoRouter, si ServerInterface, pathPrefix string) {
 
 	wrapper := ServerInterfaceWrapper{
 		Handler: si,
 	}
 
-	router.POST("/with_both_bodies", wrapper.PostBoth)
-	router.GET("/with_both_responses", wrapper.GetBoth)
-	router.POST("/with_json_body", wrapper.PostJson)
-	router.GET("/with_json_response", wrapper.GetJson)
-	router.POST("/with_other_body", wrapper.PostOther)
-	router.GET("/with_other_response", wrapper.GetOther)
-	router.GET("/with_trailing_slash/", wrapper.GetJsonWithTrailingSlash)
+	router.POST(path.Join(pathPrefix, "/with_both_bodies"), wrapper.PostBoth)
+	router.GET(path.Join(pathPrefix, "/with_both_responses"), wrapper.GetBoth)
+	router.POST(path.Join(pathPrefix, "/with_json_body"), wrapper.PostJson)
+	router.GET(path.Join(pathPrefix, "/with_json_response"), wrapper.GetJson)
+	router.POST(path.Join(pathPrefix, "/with_other_body"), wrapper.PostOther)
+	router.GET(path.Join(pathPrefix, "/with_other_response"), wrapper.GetOther)
+	router.GET(path.Join(pathPrefix, "/with_trailing_slash/"), wrapper.GetJsonWithTrailingSlash)
 
 }
 
