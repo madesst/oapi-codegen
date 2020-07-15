@@ -14,6 +14,9 @@ import (
 	"github.com/deepmap/oapi-codegen/pkg/runtime"
 	"github.com/getkin/kin-openapi/openapi3"
 	"github.com/labstack/echo/v4"
+	"net/http"
+	"path"
+	"strings"
 )
 
 // ServerInterface represents all server handlers.
@@ -119,16 +122,16 @@ type EchoRouter interface {
 }
 
 // RegisterHandlers adds each server route to the EchoRouter.
-func RegisterHandlers(router EchoRouter, si ServerInterface) {
+func RegisterHandlers(router EchoRouter, si ServerInterface, pathPrefix string) {
 
 	wrapper := ServerInterfaceWrapper{
 		Handler: si,
 	}
 
-	router.GET("/pets", wrapper.FindPets)
-	router.POST("/pets", wrapper.AddPet)
-	router.DELETE("/pets/:id", wrapper.DeletePet)
-	router.GET("/pets/:id", wrapper.FindPetById)
+	router.GET(path.Join(pathPrefix, "/pets"), wrapper.FindPets)
+	router.POST(path.Join(pathPrefix, "/pets"), wrapper.AddPet)
+	router.DELETE(path.Join(pathPrefix, "/pets/:id"), wrapper.DeletePet)
+	router.GET(path.Join(pathPrefix, "/pets/:id"), wrapper.FindPetById)
 
 }
 

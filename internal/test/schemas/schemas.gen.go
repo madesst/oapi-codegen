@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 
 	"gopkg.in/yaml.v2"
@@ -303,7 +304,8 @@ func (c *Client) Issue9(ctx context.Context, params *Issue9Params, body Issue9JS
 func NewEnsureEverythingIsReferencedRequest(server string) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -318,7 +320,8 @@ func NewEnsureEverythingIsReferencedRequest(server string) (*http.Request, error
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -330,7 +333,8 @@ func NewEnsureEverythingIsReferencedRequest(server string) (*http.Request, error
 func NewIssue127Request(server string) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -345,7 +349,8 @@ func NewIssue127Request(server string) (*http.Request, error) {
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -368,7 +373,8 @@ func NewIssue185Request(server string, body Issue185JSONRequestBody) (*http.Requ
 func NewIssue185RequestWithBody(server string, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -383,7 +389,8 @@ func NewIssue185RequestWithBody(server string, contentType string, body io.Reade
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), body)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -437,7 +444,8 @@ func NewIssue30Request(server string, pFallthrough string) (*http.Request, error
 		return nil, err
 	}
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -452,7 +460,8 @@ func NewIssue30Request(server string, pFallthrough string) (*http.Request, error
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -471,7 +480,8 @@ func NewIssue41Request(server string, n1param N5StartsWithNumber) (*http.Request
 		return nil, err
 	}
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -486,7 +496,8 @@ func NewIssue41Request(server string, n1param N5StartsWithNumber) (*http.Request
 		return nil, err
 	}
 
-	req, err := http.NewRequest("GET", queryUrl.String(), nil)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -509,7 +520,8 @@ func NewIssue9Request(server string, params *Issue9Params, body Issue9JSONReques
 func NewIssue9RequestWithBody(server string, params *Issue9Params, contentType string, body io.Reader) (*http.Request, error) {
 	var err error
 
-	queryUrl, err := url.Parse(server)
+	var queryUrl *url.URL
+	queryUrl, err = url.Parse(server)
 	if err != nil {
 		return nil, err
 	}
@@ -526,9 +538,16 @@ func NewIssue9RequestWithBody(server string, params *Issue9Params, contentType s
 
 	queryValues := queryUrl.Query()
 
-	if queryFrag, err := runtime.StyleParam("form", true, "foo", params.Foo); err != nil {
+	var queryFrag string
+	var parsed url.Values
+	var queryParamBuf []byte
+	_ = queryFrag
+	_ = parsed
+	_ = queryParamBuf
+
+	if queryFrag, err = runtime.StyleParam("form", true, "foo", params.Foo); err != nil {
 		return nil, err
-	} else if parsed, err := url.ParseQuery(queryFrag); err != nil {
+	} else if parsed, err = url.ParseQuery(queryFrag); err != nil {
 		return nil, err
 	} else {
 		for k, v := range parsed {
@@ -540,7 +559,8 @@ func NewIssue9RequestWithBody(server string, params *Issue9Params, contentType s
 
 	queryUrl.RawQuery = queryValues.Encode()
 
-	req, err := http.NewRequest("GET", queryUrl.String(), body)
+	var req *http.Request
+	req, err = http.NewRequest("GET", queryUrl.String(), body)
 	if err != nil {
 		return nil, err
 	}
@@ -1160,19 +1180,18 @@ type EchoRouter interface {
 }
 
 // RegisterHandlers adds each server route to the EchoRouter.
-func RegisterHandlers(router EchoRouter, si ServerInterface) {
+func RegisterHandlers(router EchoRouter, si ServerInterface, pathPrefix string) {
 
 	wrapper := ServerInterfaceWrapper{
 		Handler: si,
 	}
 
-	router.GET("/ensure-everything-is-referenced", wrapper.EnsureEverythingIsReferenced)
-	router.GET("/issues/127", wrapper.Issue127)
-	router.GET("/issues/185", wrapper.Issue185)
-	router.GET("/issues/209/$:str", wrapper.Issue209)
-	router.GET("/issues/30/:fallthrough", wrapper.Issue30)
-	router.GET("/issues/41/:1param", wrapper.Issue41)
-	router.GET("/issues/9", wrapper.Issue9)
+	router.GET(path.Join(pathPrefix, "/ensure-everything-is-referenced"), wrapper.EnsureEverythingIsReferenced)
+	router.GET(path.Join(pathPrefix, "/issues/127"), wrapper.Issue127)
+	router.GET(path.Join(pathPrefix, "/issues/185"), wrapper.Issue185)
+	router.GET(path.Join(pathPrefix, "/issues/30/:fallthrough"), wrapper.Issue30)
+	router.GET(path.Join(pathPrefix, "/issues/41/:1param"), wrapper.Issue41)
+	router.GET(path.Join(pathPrefix, "/issues/9"), wrapper.Issue9)
 
 }
 
