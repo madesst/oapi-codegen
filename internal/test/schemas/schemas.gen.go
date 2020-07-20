@@ -956,7 +956,7 @@ type ServerInterface interface {
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
-	Handler ServerInterface
+	Handler func(echo.Context) ServerInterface
 }
 
 // EnsureEverythingIsReferenced converts echo context to params.
@@ -964,7 +964,7 @@ func (w *ServerInterfaceWrapper) EnsureEverythingIsReferenced(ctx echo.Context) 
 	var err error
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.EnsureEverythingIsReferenced(ctx)
+	err = w.Handler(ctx).EnsureEverythingIsReferenced(ctx)
 	return err
 }
 
@@ -973,7 +973,7 @@ func (w *ServerInterfaceWrapper) Issue127(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.Issue127(ctx)
+	err = w.Handler(ctx).Issue127(ctx)
 	return err
 }
 
@@ -982,7 +982,7 @@ func (w *ServerInterfaceWrapper) Issue185(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.Issue185(ctx)
+	err = w.Handler(ctx).Issue185(ctx)
 	return err
 }
 
@@ -998,7 +998,7 @@ func (w *ServerInterfaceWrapper) Issue30(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.Issue30(ctx, pFallthrough)
+	err = w.Handler(ctx).Issue30(ctx, pFallthrough)
 	return err
 }
 
@@ -1014,7 +1014,7 @@ func (w *ServerInterfaceWrapper) Issue41(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.Issue41(ctx, n1param)
+	err = w.Handler(ctx).Issue41(ctx, n1param)
 	return err
 }
 
@@ -1032,7 +1032,7 @@ func (w *ServerInterfaceWrapper) Issue9(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.Issue9(ctx, params)
+	err = w.Handler(ctx).Issue9(ctx, params)
 	return err
 }
 
@@ -1055,9 +1055,15 @@ type EchoRouter interface {
 func RegisterHandlers(router EchoRouter, si ServerInterface, pathPrefix string) {
 
 	wrapper := ServerInterfaceWrapper{
-		Handler: si,
+		Handler: func(echo.Context) ServerInterface {
+			return si
+		},
 	}
+	wrapper.RegisterHandlers(router, pathPrefix)
 
+}
+
+func (wrapper ServerInterfaceWrapper) RegisterHandlers(router EchoRouter, pathPrefix string) {
 	router.GET(path.Join(pathPrefix, "/ensure-everything-is-referenced"), wrapper.EnsureEverythingIsReferenced)
 	router.GET(path.Join(pathPrefix, "/issues/127"), wrapper.Issue127)
 	router.GET(path.Join(pathPrefix, "/issues/185"), wrapper.Issue185)
