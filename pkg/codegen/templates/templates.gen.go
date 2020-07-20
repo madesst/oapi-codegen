@@ -757,9 +757,15 @@ type EchoRouter interface {
 func RegisterHandlers(router EchoRouter, si ServerInterface, pathPrefix string) {
 {{if .}}
     wrapper := ServerInterfaceWrapper{
-        Handler: si,
+        Handler: func(echo.Context) ServerInterface {
+            return si
+        },
     }
+    wrapper.RegisterHandlers(router, pathPrefix)
 {{end}}
+}
+
+func (wrapper ServerInterfaceWrapper) RegisterHandlers(router EchoRouter, pathPrefix string) {
 {{range .}}router.{{.Method}}(path.Join(pathPrefix, "{{.Path | swaggerUriToEchoUri}}"), wrapper.{{.OperationId}})
 {{end}}
 }
@@ -795,7 +801,7 @@ const (
 `,
 	"wrappers.tmpl": `// ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
-    Handler ServerInterface
+    Handler func(echo.Context) ServerInterface
 }
 
 {{range .}}{{$opid := .OperationId}}// {{$opid}} converts echo context to params.
@@ -917,7 +923,7 @@ func (w *ServerInterfaceWrapper) {{.OperationId}} (ctx echo.Context) error {
 
 {{end}}{{/* .RequiresParamObject */}}
     // Invoke the callback with all the unmarshalled arguments
-    err = w.Handler.{{.OperationId}}(ctx{{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}})
+    err = w.Handler(ctx).{{.OperationId}}(ctx{{genParamNames .PathParams}}{{if .RequiresParamObject}}, params{{end}})
     return err
 }
 {{end}}

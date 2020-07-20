@@ -1305,7 +1305,7 @@ type ServerInterface interface {
 
 // ServerInterfaceWrapper converts echo contexts to parameters.
 type ServerInterfaceWrapper struct {
-	Handler ServerInterface
+	Handler func(echo.Context) ServerInterface
 }
 
 // EnsureEverythingIsReferenced converts echo context to params.
@@ -1313,7 +1313,7 @@ func (w *ServerInterfaceWrapper) EnsureEverythingIsReferenced(ctx echo.Context) 
 	var err error
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.EnsureEverythingIsReferenced(ctx)
+	err = w.Handler(ctx).EnsureEverythingIsReferenced(ctx)
 	return err
 }
 
@@ -1338,7 +1338,7 @@ func (w *ServerInterfaceWrapper) ParamsWithAddProps(ctx echo.Context) error {
 	}
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.ParamsWithAddProps(ctx, params)
+	err = w.Handler(ctx).ParamsWithAddProps(ctx, params)
 	return err
 }
 
@@ -1347,7 +1347,7 @@ func (w *ServerInterfaceWrapper) BodyWithAddProps(ctx echo.Context) error {
 	var err error
 
 	// Invoke the callback with all the unmarshalled arguments
-	err = w.Handler.BodyWithAddProps(ctx)
+	err = w.Handler(ctx).BodyWithAddProps(ctx)
 	return err
 }
 
@@ -1370,9 +1370,15 @@ type EchoRouter interface {
 func RegisterHandlers(router EchoRouter, si ServerInterface, pathPrefix string) {
 
 	wrapper := ServerInterfaceWrapper{
-		Handler: si,
+		Handler: func(echo.Context) ServerInterface {
+			return si
+		},
 	}
+	wrapper.RegisterHandlers(router, pathPrefix)
 
+}
+
+func (wrapper ServerInterfaceWrapper) RegisterHandlers(router EchoRouter, pathPrefix string) {
 	router.GET(path.Join(pathPrefix, "/ensure-everything-is-referenced"), wrapper.EnsureEverythingIsReferenced)
 	router.GET(path.Join(pathPrefix, "/params_with_add_props"), wrapper.ParamsWithAddProps)
 	router.POST(path.Join(pathPrefix, "/params_with_add_props"), wrapper.BodyWithAddProps)
